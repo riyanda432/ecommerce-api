@@ -1,0 +1,68 @@
+# Redis initialization script
+
+# Set basic configurations
+CONFIG SET maxmemory 1gb
+CONFIG SET maxmemory-policy allkeys-lru
+CONFIG SET notify-keyspace-events KEA
+
+# Define key spaces and TTLs for product caching
+SELECT 0
+
+# Setup Redis SCAN command to monitor cache hit rates
+CONFIG SET maxclients 10000
+
+# Security settings
+CONFIG SET acllog-max-len 128
+CONFIG SET timeout 300
+
+# Performance tuning
+CONFIG SET io-threads 4
+CONFIG SET activedefrag yes
+CONFIG SET maxmemory-samples 10
+CONFIG SET hash-max-ziplist-entries 512
+CONFIG SET hash-max-ziplist-value 64
+CONFIG SET stream-node-max-bytes 4096
+
+# Sample key patterns we'll be using in the application:
+# 
+# Product Cache:
+# - product:{id} -> JSON string of product details
+# - product:category:{category_id} -> List of product IDs in category
+# - product:search:{query} -> Cached search results
+# - product:trending -> Sorted set of trending product IDs
+# 
+# Category Cache:
+# - category:{id} -> JSON string of category details
+# - category:tree -> JSON string of category hierarchy
+# 
+# User Session:
+# - session:{session_id} -> JSON string of session data
+# - session:user:{user_id} -> Session ID for user
+# 
+# Cart Data:
+# - cart:active:{user_id} -> Cart ID
+# - cart:items:{cart_id} -> Hash of product IDs to quantities
+# - cart:count:{cart_id} -> Number of items in cart
+# - cart:expire:{session_id} -> Expiration for guest carts
+# 
+# Rate Limiting:
+# - ratelimit:{ip} -> Counter for rate limiting
+# - ratelimit:user:{user_id} -> User-specific rate limit
+# 
+# Inventory Management:
+# - inventory:{product_id} -> Available quantity
+# - inventory:lock:{product_id} -> Temporary lock for order processing
+# 
+# Promotions & Pricing:
+# - promotion:active -> List of active promotion IDs
+# - voucher:{code} -> JSON string of voucher details
+# - price:rules:{product_id} -> List of applicable pricing rules
+# - price:custom:{product_id}:{user_group} -> Custom price
+# 
+# Order Processing:
+# - order:processing:{order_id} -> Processing status
+# - order:recent:{user_id} -> List of recent order IDs
+# 
+# Cancellation Rate Limiting:
+# - cancel:user:{user_id} -> Counter for cancellations by user
+# - cancel:recent -> Sorted set of recent cancellations for fraud detection 
